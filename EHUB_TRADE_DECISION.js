@@ -22,9 +22,9 @@ let bl_sunrise = "bl_sunrise";
 let bl_sunset = "bl_sunset";
 let bl_sensor_ehub_ppv = "bl_sensor_ehub_ppv";   // SOLAR POWER [w] as shown in Ferroamp Cloud Dashboard
 let bl_sensor_ehub_pload_tot = "bl_sensor_ehub_pload_tot";   // SOLAR POWER [w] as shown in Ferroamp Cloud Dashboard
-let bl_dec_time_period_1_starts = "bl_dec_time_period_1_starts";
-let bl_dec_time_period_2_starts = "bl_dec_time_period_2_starts";
-let bl_dec_time_period_3_starts = "bl_dec_time_period_3_starts";
+let bl_dec_time_period_1_starts = "bl_dec_time_period_1_starts";    //Type: Number. Value: 0
+let bl_dec_time_period_2_starts = "bl_dec_time_period_2_starts";    //Type: Number. Value: 6
+let bl_dec_time_period_3_starts = "bl_dec_time_period_3_starts";    //Type: Number. Value: 18
 let bl_tesla_charge_level = "bl_tesla_charge_level";    // Tesla sharge limit from Tesla app
 let bl_tesla_soc = "bl_tesla_soc";    // Tesla sharge limit from Tesla app
 let bl_spot_now = "bl_spot_now";    // Prices from Power by the hour
@@ -43,7 +43,7 @@ let bl_ehub_debug_on = "bl_ehub_debug_on";
 
 // Write to variables
 let bl_ehub_trade_or_not = "bl_ehub_trade_or_not";  // Current decision if to trade today or not
-let bl_ehub_charge_or_discharge = "bl_ehub_charge_or_discharge"; // 0 = Use EHub own setting, 1 = Charge, 2 = Discharge,  
+let bl_ehub_charge_or_discharge = "bl_ehub_charge_or_discharge"; //Type: Number. Value: 0. Meaning: 0 = Use EHub own setting, 1 = Charge, -1 = Discharge,  
 let bl_ehub_lowerLimitToStartCharge = "bl_ehub_lowerLimitToStartCharge";
 let bl_ehub_highLimitToStartDischarge = "bl_ehub_highLimitToStartDischarge";
 let bl_ehub_message_to_user = "bl_ehub_message_to_user";

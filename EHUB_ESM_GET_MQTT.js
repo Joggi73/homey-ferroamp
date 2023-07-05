@@ -13,8 +13,8 @@ return false;
 const flow_args = JSON.parse(args[0]);
 
 // Create the following variables in BetterLogic
-let bl_ehub_esm_soc = "bl_ehub_esm_soc";          // State Of Charge for battery [%]
-let bl_ehub_esm_soh = "bl_ehub_esm_soh";          // State Of Health for battery [%]
+let bl_ehub_esm_soc = "bl_ehub_esm_soc";          // Type: Number. Value: 0. State Of Charge for battery [%]
+let bl_ehub_esm_soh = "bl_ehub_esm_soh";          // //Type: Number. Value: 0. State Of Health for battery [%]
 
 var var_soc = parseFloat(flow_args.soc.val);
 var var_soh = parseFloat(flow_args.soh.val);
