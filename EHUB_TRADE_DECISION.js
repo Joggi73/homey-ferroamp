@@ -52,7 +52,7 @@ let bl_tesla_charge_current = "bl_tesla_charge_current";
 let bl_tesla_charge_on = "bl_tesla_charge_on";
 
 // Decide if to trade today
-let TradeOrNot = 0;
+//let TradeOrNot = 0;
 let ChargeOrDischarge = 0.0;
 let messageToUser = "None";
 let debugMessage = "..";
@@ -63,7 +63,7 @@ let BLApp = await Homey.apps.getApp({id:"net.i-dev.betterlogic" });
 let temp1 = await BLApp.apiGet(bl_ehub_price_gap_to_trade);
     let gapToTrade = parseFloat(temp1.value);
 let temp4 = await BLApp.apiGet(bl_tibber_price_now);
-    let priceNow = parseFloat(temp4.value);
+//    let priceNow = parseFloat(temp4.value);
 let temp5 = await BLApp.apiGet(bl_ehub_esm_soc);
     let soc = parseFloat(temp5.value);
 let temp6 = await BLApp.apiGet(bl_ehub_upper_soc_limit);
@@ -114,6 +114,7 @@ let temp23 = await BLApp.apiGet(bl_spot_max_time_next_8h);
     let spot_max_time_next_8h = parseFloat(temp23.value);
 let temp24 = await BLApp.apiGet(bl_spot_now);
     let spot_now = parseFloat(temp24.value);
+    let priceNow = spot_now; 
 let temp25 = await BLApp.apiGet(bl_spot_1h);
     let spot_1h = parseFloat(temp25.value);
 let temp26 = await BLApp.apiGet(bl_spot_2h);
@@ -326,7 +327,7 @@ if(current_time_period == 1){               // After midnight to ppv starts
     } else {
         //Need to charge
         if(buyingBestNowComparedToNext8Hours(spot_now, spot_1h, spot_2h, spot_3h, spot_4h, spot_5h, spot_6h, spot_7h)){
-            TradeOrNot = 1;
+            //TradeOrNot = 1;
             ChargeOrDischarge = 1.0;  // Charge/Ladda/Buy
             // Save our buy
             let result45 = await BLApp.apiPut("/" + bl_last_buy_time + "/" + current_hour);             
@@ -341,24 +342,25 @@ if(current_time_period == 1){               // After midnight to ppv starts
   }
 } else {
     // Dont trade
-    TradeOrNot = 0;
+    //TradeOrNot = 0;
     ChargeOrDischarge = 0.0;
     messageToUser = current_hour +":"+ current_minute + "O Decision: Unclear period..";
 }
 
 // set Better Logic variables
 
-let result1 = await BLApp.apiPut("/" + bl_ehub_trade_or_not + "/" + TradeOrNot ); 
-let result2 = await BLApp.apiPut("/" + bl_ehub_charge_or_discharge + "/" + ChargeOrDischarge ); 
-let result3 = await BLApp.apiPut("/" + bl_ehub_lowerLimitToStartCharge + "/" + lowerLimitToStartCharge_8h ); 
-let result4 = await BLApp.apiPut("/" + bl_ehub_highLimitToStartDischarge + "/" + highLimitToStartDischarge_8h ); 
-let result5 = await BLApp.apiPut("/" + bl_ehub_message_to_user + "/" + messageToUser ); 
-let result7 = await BLApp.apiPut("/" + bl_tesla_charge_current + "/" + asked_load_current ); 
-let result8 = await BLApp.apiPut("/" + bl_tesla_charge_on + "/" + tesla_charge_on ); 
-if(bl_ehub_debug_on == true){
+//let result1 = await BLApp.apiPut("/" + bl_ehub_trade_or_not + "/" + TradeOrNot ); 
+    let result2 = await BLApp.apiPut("/" + bl_ehub_charge_or_discharge + "/" + ChargeOrDischarge ); 
+    let result3 = await BLApp.apiPut("/" + bl_ehub_lowerLimitToStartCharge + "/" + lowerLimitToStartCharge_8h ); 
+    let result4 = await BLApp.apiPut("/" + bl_ehub_highLimitToStartDischarge + "/" + highLimitToStartDischarge_8h ); 
+    let result5 = await BLApp.apiPut("/" + bl_ehub_message_to_user + "/" + messageToUser ); 
+    let result7 = await BLApp.apiPut("/" + bl_tesla_charge_current + "/" + asked_load_current ); 
+    let result8 = await BLApp.apiPut("/" + bl_tesla_charge_on + "/" + tesla_charge_on ); 
+    //if(bl_ehub_debug_on == true){
     let result6 = await BLApp.apiPut("/" + bl_ehub_debug_message + "/" + debugMessage ); 
-}
-return true;
+    //}
+
+    return true;
 
 // Functions
 function makeItToMorning(in_loc_time_float, in_hours_in_battery, loc_sunset_float, loc_sunrise_float) {
@@ -524,14 +526,14 @@ function priceComingNightMuchHigherThanNow(){
 //          ->>> Need current load/burn rate, soc, time now [HH], time sunrise [HH]
 // Set a minimum price gap for sell/buy
     //Revenue to sell is
-        // Tibber spot (utan skatter och avgifter)
+        // Spot price (utan skatter och avgifter)
         // Nätbolag (Elevio) produktionsersättning 0,0540 [kr/kWh]
         // Skattereduktion = 0,60kr/kWh
-        // Revenue to sell = Tibber spot (utan moms skatter och avgifter) + 0,6540
+        // Revenue to sell = Spot price (utan moms skatter och avgifter) + 0,6540
     //Cost to buy
-        // Tibber spot + moms (25%), skatter och avgifter (ca 10öre) + 0,08 kr/kWh (Tibber-påslag)     
+        // Spot price + moms (25%), skatter och avgifter (ca 10öre) + 0,08 kr/kWh (Tibber-påslag)     
         // Nätbolag (Elevio) 0,79 [kr/kWh] inc taxes
-        // Cost to buy = Tibber spot + moms, skatter och avgifter + 0,79 [kr/kWh] + 0,08 [kr/kWh] 
+        // Cost to buy = Spot price + moms, skatter och avgifter + 0,79 [kr/kWh] + 0,08 [kr/kWh] 
     // Ex. spot 1kr/kWh:
     // Sell: 1,00 + 0,0540 + 0,60 = 1,654
     // Buy: 1,00 + 0,08 + 0,25 + 0,10  + 0,79 = 2,22
