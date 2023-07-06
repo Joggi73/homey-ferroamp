@@ -38,9 +38,9 @@ The following flows and javascripts are tools for starting your own automation w
         -   EHUB_GET_MQTT.js
         -   EHUB_ESM_GET_MQTT.js
 -   Power by the Hour
-    -   TBD..
+    In Homey goto the Devices page, add power by the hour as a device. Click the device and the settings symbol. The following settingsmight change in the future, but right now I use exchange reates, bidding zones (SE3), variable markup 25% (VAT/moms) and a fixed markup for Tibber and Elevio. Se picture of settings in attached doc file.
 -   CountDown
-    -   On Homey Pro, goto settings, find the app 'CountDown' app. Select 'Configure' and add the timers:
+    On Homey Pro, goto settings, find the app 'CountDown' app. Select 'Configure' and add the timers:
         -   MqttCountDownToStart
         -   EHUB_ESM_TIMER 
 ## Adding the flows
