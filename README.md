@@ -1,4 +1,6 @@
 # Homey Pro for Ferroamp EnergyHub
+## Target
+The following flows and javascripts are tools for starting your own automation with Homey Pro and ferroamp EnergyHub integration. I use the ferroamp EnergyHub, the ferroamp battery ESS, Tibber, a Tesla Wall Charger (WC) and other loads in the household like a NIBE heat pump, heated floors, Hue lamps etc.
 ## Prerequisites
 ### Install the following apps to Homey Pro
 -	Power by the Hour
@@ -6,7 +8,7 @@
 -	HomeyScript
 -	Better Logic Library
 -	CountDown
--	(Tibber not used for prices anymore)
+-	(Tibber is where I deliver the produced power, but is not used for real time prices anymore)
 ### Nice to have
 -	Fing (or similar tool to se devices and IP’s on your network)
 -	MQTT Explorer (to debug if the hub sends anything on your network)
@@ -42,6 +44,4 @@
         -   MqttCountDownToStart
         -   EHUB_ESM_TIMER 
 ## Adding the flows
-    -   TBD
-
-
+    -   For flows in picture format, download the homey-ferroamp-flows.doc file
