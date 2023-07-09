@@ -1,3 +1,7 @@
+// EHUB_TRADE_DECISION.js
+// This script decides if the EnegryHub should charge or discharge the battery 
+// considering the spot price now compared to the previous and coming hours. 
+//
 // Make sure BetterLogic is installed
 let bl = await Homey.apps.getApp({ id: 'net.i-dev.betterlogic' } );
 if (!bl) {
@@ -27,7 +31,7 @@ let bl_dec_time_period_2_starts = "bl_dec_time_period_2_starts";    //Type: Numb
 let bl_dec_time_period_3_starts = "bl_dec_time_period_3_starts";    //Type: Number. Value: 18
 let bl_tesla_charge_level = "bl_tesla_charge_level";    // Tesla sharge limit from Tesla app
 let bl_tesla_soc = "bl_tesla_soc";    // Tesla sharge limit from Tesla app
-let bl_spot_now = "bl_spot_now";    // Prices from Power by the hour
+let bl_spot = "bl_spot";    // Prices from Power by the hour
 let bl_spot_1h = "bl_spot_1h";    // Prices from Power by the hour
 let bl_spot_2h = "bl_spot_2h";    // Prices from Power by the hour
 let bl_spot_3h = "bl_spot_3h";    // Prices from Power by the hour
@@ -112,7 +116,7 @@ let temp22 = await BLApp.apiGet(bl_spot_min_time_next_8h);
     let spot_min_time_next_8h = parseFloat(temp22.value);
 let temp23 = await BLApp.apiGet(bl_spot_max_time_next_8h);
     let spot_max_time_next_8h = parseFloat(temp23.value);
-let temp24 = await BLApp.apiGet(bl_spot_now);
+let temp24 = await BLApp.apiGet(bl_spot);
     let spot_now = parseFloat(temp24.value);
     let priceNow = spot_now; 
 let temp25 = await BLApp.apiGet(bl_spot_1h);
