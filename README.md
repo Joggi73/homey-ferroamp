@@ -43,5 +43,8 @@ The following flows and javascripts are tools for starting your own automation w
     On Homey Pro, goto settings, find the app 'CountDown' app. Select 'Configure' and add the timers:
         -   MqttCountDownToStart
         -   EHUB_ESM_TIMER 
+-   HomeyScript
+        When you installed HomeyScript you will get a script icon 
+        </> in the left pane. From there; add a new HomeyScript and copy/past the java scripts code into it (EHUB_TRADE_DECISION.JS and so on).
 ## Adding the flows
     -   For flows in picture format, download the homey-ferroamp-flows.doc file
