@@ -29,8 +29,6 @@ let bl_sensor_ehub_pload_tot = "bl_sensor_ehub_pload_tot";   // SOLAR POWER [w] 
 let bl_dec_time_period_1_starts = "bl_dec_time_period_1_starts";    //Type: Number. Value: 0
 let bl_dec_time_period_2_starts = "bl_dec_time_period_2_starts";    //Type: Number. Value: 6
 let bl_dec_time_period_3_starts = "bl_dec_time_period_3_starts";    //Type: Number. Value: 18
-let bl_tesla_charge_level = "bl_tesla_charge_level";    // Tesla sharge limit from Tesla app
-let bl_tesla_soc = "bl_tesla_soc";    // Tesla sharge limit from Tesla app
 let bl_spot = "bl_spot";    // Prices from Power by the hour
 let bl_spot_1h = "bl_spot_1h";    // Prices from Power by the hour
 let bl_spot_2h = "bl_spot_2h";    // Prices from Power by the hour
@@ -52,8 +50,6 @@ let bl_ehub_lowerLimitToStartCharge = "bl_ehub_lowerLimitToStartCharge";
 let bl_ehub_highLimitToStartDischarge = "bl_ehub_highLimitToStartDischarge";
 let bl_ehub_message_to_user = "bl_ehub_message_to_user";
 let bl_ehub_debug_message = "bl_ehub_debug_message";
-let bl_tesla_charge_current = "bl_tesla_charge_current";
-let bl_tesla_charge_on = "bl_tesla_charge_on";
 
 // Decide if to trade today
 //let TradeOrNot = 0;
@@ -104,10 +100,6 @@ let temp16 = await BLApp.apiGet(bl_dec_time_period_2_starts);
 let temp17 = await BLApp.apiGet(bl_dec_time_period_3_starts);
     let period3_start = parseFloat(temp17.value);
     period3_start = period3_start.toPrecision(4);
-let temp18 = await BLApp.apiGet(bl_tesla_charge_level);
-    let tesla_charge_limit = parseFloat(temp18.value);
-let temp19 = await BLApp.apiGet(bl_tesla_soc);
-    let tesla_soc = parseFloat(temp19.value);
 let temp20 = await BLApp.apiGet(bl_spot_max_next_8h);
     let spot_max_next_8h = parseFloat(temp20.value);
 let temp21 = await BLApp.apiGet(bl_spot_min_next_8h);
@@ -190,11 +182,6 @@ willMakeTheNight = makeItToMorning(time_float, hours_in_battery, sunset_float, s
 //debugMessage = debugMessage + " willMakeTheNight " + String(willMakeTheNight) + " time_float " + time_float + " hours_in_battery " + hours_in_battery + " sunset_float " + sunset_float + " sunrise_float " + sunrise_float;
 let time_since_last_buy = 0;
 let time_since_last_sell = 0;
-let tesla_needs_charging = 0;
-let tesla_charge_on = 0;
-let asked_load_current = 0;
-
-if (tesla_charge_limit > tesla_soc) tesla_needs_charging = 1;
 
 // Do separate depending on time per day:
 let current_time_period = getTimePeriod(time_float);
@@ -242,24 +229,6 @@ if(current_time_period == 1){               // After midnight to ppv starts
     }
 
 } else if(current_time_period == 2){    // Day time Panels generate
-    // First, check if Tesla needs to charge, then trade..
- 
-    if(ppv > 4 && tesla_needs_charging == 1){    
-    //    ChargeOrDischarge = 0.0;  // No trade
-        // Ask loads to start loading up to max ppv level (Tesla etc.)
-        // 3 x 13A = 9kW, 
-        // 10A = 6.9kW
-        //  8A = 5,5kW
-        //  7,2A = 5kW
-        
-        let calculated_ask_load_current = ppv/(230*3)- 0.5 ;
-        calculated_ask_load_current = calculated_ask_load_current.toPrecision(2);
-        asked_load_current = Math.round(calculated_ask_load_current);
-        if(asked_load_current > 13) { asked_load_current = 13; }
-        if(asked_load_current < 3)  { asked_load_current =  3;  }
-        messageToUser = current_hour +":"+ current_minute + "E Decision: Ask loads to charge" + String(asked_load_current) +" A. (Calc current "+ String(calculated_ask_load_current) +") Dont buy. ppv is " +ppv +" pload "+ pload ; 
-        tesla_charge_on = 1;
-    }
     // Price low enough to buy. Basera på priser inom tidsperioden istället för hela dygnets max och min..    
     if(bestBuyNow(current_hour, priceNow, last_sell_time, last_sell_price, spot_max_next_8h, gapToTrade)) {   // Price low enough to buy/charge 
         if(ppv>4){                           //If panels produce much, charge from sun even if low prices
@@ -358,8 +327,6 @@ if(current_time_period == 1){               // After midnight to ppv starts
     let result3 = await BLApp.apiPut("/" + bl_ehub_lowerLimitToStartCharge + "/" + lowerLimitToStartCharge_8h ); 
     let result4 = await BLApp.apiPut("/" + bl_ehub_highLimitToStartDischarge + "/" + highLimitToStartDischarge_8h ); 
     let result5 = await BLApp.apiPut("/" + bl_ehub_message_to_user + "/" + messageToUser ); 
-    let result7 = await BLApp.apiPut("/" + bl_tesla_charge_current + "/" + asked_load_current ); 
-    let result8 = await BLApp.apiPut("/" + bl_tesla_charge_on + "/" + tesla_charge_on ); 
     //if(bl_ehub_debug_on == true){
     let result6 = await BLApp.apiPut("/" + bl_ehub_debug_message + "/" + debugMessage ); 
     //}
@@ -506,11 +473,9 @@ function priceComingNightMuchHigherThanNow(){
 //  1. 00- ppv time starts 
 //                      Only buy what can be sold during morning with revenue
 //  2. ppv time starts - x before time ppv falls  
-//                      Normal buy sell period:
-//                      First ask loads to start loading up to max ppv level (Tesla etc.)
 //                      Separate buy and sell decisions:
 //                          Buy:   Only buy if able to sell during rest of day or night
-//                          Sell:  Sell pricy, but never if Tesla (or loads) need charging             
+//                          Sell:  Sell pricy             
 //  3. x before ppv falls (summer around 18.00?), 
 //      only sell 
 //      -   if battery SOC make it til morning without buying (Aim to overnight with Self Consumption )
