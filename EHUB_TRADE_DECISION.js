@@ -25,7 +25,7 @@ let bl_time = "bl_time";
 let bl_sunrise = "bl_sunrise"; 
 let bl_sunset = "bl_sunset";
 let bl_sensor_ehub_ppv = "bl_sensor_ehub_ppv";   // SOLAR POWER [w] as shown in Ferroamp Cloud Dashboard
-let bl_sensor_ehub_pload_tot = "bl_sensor_ehub_pload_tot";   // SOLAR POWER [w] as shown in Ferroamp Cloud Dashboard
+let bl_sensor_ehub_pload_tot = "bl_sensor_ehub_pload_tot";   // Loads [w] as shown in Ferroamp Cloud Dashboard
 let bl_dec_time_period_1_starts = "bl_dec_time_period_1_starts";    //Type: Number. Value: 0
 let bl_dec_time_period_2_starts = "bl_dec_time_period_2_starts";    //Type: Number. Value: 6
 let bl_dec_time_period_3_starts = "bl_dec_time_period_3_starts";    //Type: Number. Value: 18
@@ -198,7 +198,7 @@ if(current_time_period == 1){               // After midnight to ppv starts
                 let result45 = await BLApp.apiPut("/" + bl_last_buy_time + "/" + current_hour); 
                 let result42 = await BLApp.apiPut("/" + bl_last_buy_price + "/" + priceNow); 
 
-                messageToUser = current_hour +":"+ current_minute + "A Decision: Buy electricity. Price is " + priceNow + " and under start limit " + lowerLimitToStartCharge_8h +" pload "+ pload +" ppv "+ ppv +" Low price hour in 8h: " +String(spot_min_time_next_8h)+" High price hour in 8h: "+String(spot_max_time_next_8h) ; 
+                messageToUser = current_hour +":"+ current_minute + "A Decision: Buy electricity. Price is " + priceNow + " last_sell_price: " + last_sell_price + " spot_max_next_8h: " + spot_max_next_8h + " pload "+ pload +" Low price hour in 8h: " +String(spot_min_time_next_8h)+" High price hour in 8h: "+String(spot_max_time_next_8h) ; 
             } else {
                 ChargeOrDischarge = 0.0;  // No trade
                 messageToUser = current_hour +":"+ current_minute + "B Decision: No trading. Low price, battery full, SOC " + String(soc)+ " Low price hour in 8h: " +String(spot_min_time_next_8h)+" High price hour in 8h: "+String(spot_max_time_next_8h);         
