@@ -1,6 +1,6 @@
 # Homey Pro for Ferroamp EnergyHub
 ## Target
-The following flows and javascripts are tools for starting your own automation with Homey Pro and ferroamp EnergyHub integration depending on spot prices and generated solar power.
+The following flows and javascripts are tools for starting your own automation with Homey Pro and ferroamp EnergyHub using spot prices and measured solar power.
 ## Prerequisites
 ### Install the following apps to Homey Pro
 -	HomeyScript
