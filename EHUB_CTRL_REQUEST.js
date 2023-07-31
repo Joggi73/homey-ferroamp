@@ -14,9 +14,7 @@ let bl_ehub_ctrl_discharge_power = "bl_ehub_ctrl_discharge_power";  //Type: Numb
 
 // Write to
 let bl_ehub_ctrl_mqtt_message = "bl_ehub_ctrl_mqtt_message";    // String
-//let bl_ehub_is_charging = "bl_ehub_is_charging";                // Boolean     
-//let bl_ehub_is_discharging = "bl_ehub_is_discharging";          // Boolean
-// let bl_ehub_is_under_control = "bl_ehub_is_under_control";      // Boolean
+let bl_ehub_debug_message = "bl_ehub_debug_message";
 
 // Better Logic  
 let BLApp = await Homey.apps.getApp({id:"net.i-dev.betterlogic" }); 
@@ -35,6 +33,7 @@ let dischargePower = tmp5.value;
 
 let newTransactionId = 0;
 let newMessage = "";
+let debugMessage = "";
 
 if(lastTranactionOk = 1){
     
@@ -50,10 +49,6 @@ if(lastTranactionOk = 1){
         newMessage = '{"transId": "' + newTransactionId + '", "cmd": { "name":"charge","arg":"' + chargePower + '"}}';
         await BLApp.apiPut("/" + bl_ehub_ctrl_mqtt_message + "/" + newMessage);
         await BLApp.apiPut("/" + bl_ehub_ctrl_last_transId + "/" + newTransactionId);
-
-//        await BLApp.apiPut("/" + bl_ehub_is_charging + "/" + "true");
-//        await BLApp.apiPut("/" + bl_ehub_is_discharging + "/" + "false");
-//        await BLApp.apiPut("/" + bl_ehub_is_under_control + "/" + "true");
         
     } else if (go_charging <= -1) {
         // 5.1.1.1.2 Discharging with 12 kW:
@@ -62,21 +57,17 @@ if(lastTranactionOk = 1){
         await BLApp.apiPut("/" + bl_ehub_ctrl_mqtt_message + "/" + newMessage);
         await BLApp.apiPut("/" + bl_ehub_ctrl_last_transId + "/" + newTransactionId);
 
-//        await BLApp.apiPut("/" + bl_ehub_is_charging + "/" + "false");
-//        await BLApp.apiPut("/" + bl_ehub_is_discharging + "/" + "true");
-//        await BLApp.apiPut("/" + bl_ehub_is_under_control + "/" + "true");
     } else {
         // 5.1.1.1.3 Returning control of batteries to system:
         // extapi/control/request {"transId": "989C6E5C-2CC1-11CA-A044-08002B1BB4F5", "cmd": {"name": "auto"}}
         newMessage = '{"transId": "' + newTransactionId + '", "cmd": {"name":"auto"}}';
         await BLApp.apiPut("/" + bl_ehub_ctrl_mqtt_message + "/" + newMessage);
         await BLApp.apiPut("/" + bl_ehub_ctrl_last_transId + "/" + newTransactionId);
-
-//        await BLApp.apiPut("/" + bl_ehub_is_charging + "/" + "false");
-//        await BLApp.apiPut("/" + bl_ehub_is_discharging + "/" + "false");
-//        await BLApp.apiPut("/" + bl_ehub_is_under_control + "/" + "false");
     }
 
 } else {
+    debugMessage = "ehub_ctrl_request: Cannot send message to EHUB.";
+    let result6 = await BLApp.apiPut("/" + bl_ehub_debug_message + "/" + debugMessage ); 
+          
     return false;
 }

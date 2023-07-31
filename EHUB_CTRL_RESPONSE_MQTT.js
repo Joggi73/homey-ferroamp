@@ -15,12 +15,12 @@ const flow_args = JSON.parse(args[0]);
 // Create the following variables in BetterLogic
 let bl_ehub_ctrl_resp_status = "bl_ehub_ctrl_resp_status";      // String    
 let bl_ehub_ctrl_resp_msg = "bl_ehub_ctrl_resp_msg";            // String
-let bl_ehub_ctrl_resp_transId = "bl_ehub_ctrl_resp_transId";    //Number
-let bl_ehub_ctrl_result_ok = "bl_ehub_ctrl_result_ok";           // Number. Recieved by REHUB_CTRL_REQUEST
+let bl_ehub_ctrl_resp_transId = "bl_ehub_ctrl_resp_transId";    // Number
+let bl_ehub_ctrl_result_ok = "bl_ehub_ctrl_result_ok";          // Number. Recieved by REHUB_CTRL_REQUEST
 
 let ctrl_resp_status = flow_args.status;
 let ctrl_resp_msg = flow_args.msg;
-let ctrl_resp_transId = flow_args.msg.transId;
+let ctrl_resp_transId = flow_args.transId;
 
 //await BLApp.apiPut("/" + bl_ehub_eso_soc + "/" + parseFloat(flow_args.soc.val));
 let BLApp = await Homey.apps.getApp({id:"net.i-dev.betterlogic" }); 
