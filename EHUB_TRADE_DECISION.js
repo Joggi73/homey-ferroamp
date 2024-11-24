@@ -49,6 +49,8 @@ const bl_ehub_variable_markup_buy = "bl_ehub_variable_markup_buy";    // From ex
 const bl_ehub_variable_markup_sell = "bl_ehub_variable_markup_sell";  // From example below: 1
 const bl_ehub_best_charge_hour_now = "bl_ehub_best_charge_hour_now";    // 1 means this hour is one of the best charging hours
 const bl_ehub_off_season = "bl_ehub_off_season";    // 1 = WINTER TIME
+const bl_ehub_eso_temp = "bl_ehub_eso_temp";
+
 // Write to variables
 // let bl_ehub_trade_or_not = "bl_ehub_trade_or_not";  // Current decision if to trade today or not
 const bl_ehub_charge_or_discharge = "bl_ehub_charge_or_discharge"; //Type: Number. Value: 0. Meaning: 0 = Use EHub own setting, 1 = Charge, -1 = Discharge,  
@@ -145,18 +147,18 @@ let temp25 = await BLApp.apiGet(bl_spot_1h);
     let spot_1h = parseFloat(temp25.value);
     if(spot_1h < 0){ spot_1h = 0; }
     let adj_sell_spot_1h = AdjustedSellPrice(spot_1h, fixed_markup_sell, variable_markup_sell);
-    let adj_buy_spot_1h = AdjustedBuyPrice(spot_1h, fixed_markup_sell, variable_markup_sell);
+    let adj_buy_spot_1h = AdjustedBuyPrice(spot_1h, fixed_markup_buy, variable_markup_buy);
 
 let temp26 = await BLApp.apiGet(bl_spot_2h);
     let spot_2h = parseFloat(temp26.value);
     if(spot_2h < 0){ spot_2h = 0; }
     let adj_sell_spot_2h = AdjustedSellPrice(spot_2h, fixed_markup_sell, variable_markup_sell);
-    let adj_buy_spot_2h = AdjustedBuyPrice(spot_2h, fixed_markup_sell, variable_markup_sell);
+    let adj_buy_spot_2h = AdjustedBuyPrice(spot_2h, fixed_markup_buy, variable_markup_buy);
 let temp27 = await BLApp.apiGet(bl_spot_3h);
     let spot_3h = parseFloat(temp27.value);
     if(spot_3h < 0){ spot_3h = 0; }
     let adj_sell_spot_3h = AdjustedSellPrice(spot_3h, fixed_markup_sell, variable_markup_sell);
-    let adj_buy_spot_3h = AdjustedBuyPrice(spot_3h, fixed_markup_sell, variable_markup_sell);
+    let adj_buy_spot_3h = AdjustedBuyPrice(spot_3h, fixed_markup_buy, variable_markup_buy);
 
     debugMessage = debugMessage + "spot_1h: " + spot_1h 
                                     + "\nspot_2h: " + spot_2h
@@ -165,19 +167,19 @@ let temp27 = await BLApp.apiGet(bl_spot_3h);
 let temp28 = await BLApp.apiGet(bl_spot_4h);
     let spot_4h = parseFloat(temp28.value);
     if(spot_4h < 0){ spot_4h = 0; }
-    let adj_buy_spot_4h = AdjustedBuyPrice(spot_4h, fixed_markup_sell, variable_markup_sell);
+    let adj_buy_spot_4h = AdjustedBuyPrice(spot_4h, fixed_markup_buy, variable_markup_buy);
 let temp29 = await BLApp.apiGet(bl_spot_5h);
     let spot_5h = parseFloat(temp29.value);
     if(spot_5h < 0){ spot_5h = 0; }
-    let adj_buy_spot_5h = AdjustedBuyPrice(spot_5h, fixed_markup_sell, variable_markup_sell);
+    let adj_buy_spot_5h = AdjustedBuyPrice(spot_5h, fixed_markup_buy, variable_markup_buy);
 let temp30 = await BLApp.apiGet(bl_spot_6h);
     let spot_6h = parseFloat(temp30.value);
     if(spot_6h < 0){ spot_6h = 0; }
-    let adj_buy_spot_6h = AdjustedBuyPrice(spot_6h, fixed_markup_sell, variable_markup_sell);
+    let adj_buy_spot_6h = AdjustedBuyPrice(spot_6h, fixed_markup_buy, variable_markup_buy);
 let temp31 = await BLApp.apiGet(bl_spot_7h);
     let spot_7h = parseFloat(temp31.value);
     if(spot_7h < 0){ spot_7h = 0; }
-    let adj_buy_spot_7h = AdjustedBuyPrice(spot_7h, fixed_markup_sell, variable_markup_sell);
+    let adj_buy_spot_7h = AdjustedBuyPrice(spot_7h, fixed_markup_buy, variable_markup_buy);
 let temp32 = await BLApp.apiGet(bl_last_buy_time);
     let last_buy_time = parseFloat(temp32.value);
 let temp33 = await BLApp.apiGet(bl_last_buy_price);
@@ -196,6 +198,9 @@ let bestChargetimeNow = 0;
 let ehub_off_season = 0;
     let temp41 = await BLApp.apiGet(bl_ehub_off_season);
     ehub_off_season = parseFloat(temp41.value);  
+let ehub_temp = 0;
+    let temp42 = await BLApp.apiGet(bl_ehub_eso_temp);
+    ehubESOtemp = parseFloat(temp42.value);  
     
 
 // ALWAYS DO THIS:
@@ -239,9 +244,15 @@ if(soc > lower_soc_limit){
 }
 hours_in_battery = hours_in_battery.toPrecision(4);
 
+debugMessage = debugMessage + "\nDEBUG: soc lunch" + soc + ". lower_soc_limit: " + lower_soc_limit + ". average_burn_rate: " + average_burn_rate;
+
 // let willMakeTheNight = false;
 let willMakeTheNight = makeItToMorning(time_float, hours_in_battery, sunset_float, sunrise_float);    // Test if make it to morning
+let timeToNextPossibleBuy = 200;
 let willMakeItToNextBuy = makeItToNextBuyTime2(hours_in_battery, gapToTrade, adjSellPriceNow, adj_buy_spot_1h, adj_buy_spot_2h, adj_buy_spot_3h, adj_buy_spot_4h, adj_buy_spot_5h, adj_buy_spot_6h, adj_buy_spot_7h);
+
+//if (timeToNextPossibleBuy <= hours_in_battery){ willMakeItToNextBuy = true;}
+
 let itIsBestSellTimeNow = bestSellNow(current_hour ,adjSellPriceNow, last_buy_time, adjBuyPriceLast, adj_buy_spot_min_next_8h, gapToTrade, adj_sell_spot_1h, adj_sell_spot_2h, adj_sell_spot_3h, ehub_off_season);
 let itIsBestBuyTimeNow = bestBuyNow(current_hour, adjBuyPriceNow, last_sell_time, adjSellPriceLast, adj_sell_spot_max_next_8h, gapToTrade, adj_buy_spot_1h, adj_buy_spot_2h, adj_buy_spot_3h, adj_buy_spot_4h, adj_buy_spot_5h, adj_buy_spot_6h);
 //debugMessage = debugMessage + " willMakeTheNight " + String(willMakeTheNight) + " time_float " + time_float + " hours_in_battery " + hours_in_battery + " sunset_float " + sunset_float + " sunrise_float " + sunrise_float;
@@ -256,10 +267,10 @@ if(adjBuyPriceNow <= fixed_markup_buy + 0.05){
         let result44 = await BLApp.apiPut("/" + bl_last_buy_price + "/" + priceNow); 
         let result44b = await BLApp.apiPut("/" + bl_last_buy_price_adj + "/" + adjBuyPriceNow); 
 
-        messageToUser = current_hour +":"+ current_minute + "\nM1 Decision: Super low spot and need to charge/buy. " + AddMessage( priceNow, adjBuyPriceNow, adjSellPriceNow, last_buy_price, adjBuyPriceLast, last_buy_time, last_sell_price, adjSellPriceLast,last_sell_time, spot_max_next_8h, adj_sell_spot_max_next_8h, spot_max_time_next_8h, spot_min_next_8h, adj_buy_spot_min_next_8h, spot_min_time_next_8h, gapToTrade, willMakeItToNextBuy, willMakeTheNight, itIsBestSellTimeNow, itIsBestBuyTimeNow, soc, ppv); 
+        messageToUser = time + "\nM1 Decision: Super low spot and need to charge/buy. " + AddMessage( priceNow, adjBuyPriceNow, adjSellPriceNow, last_buy_price, adjBuyPriceLast, last_buy_time, last_sell_price, adjSellPriceLast,last_sell_time, spot_max_next_8h, adj_sell_spot_max_next_8h, spot_max_time_next_8h, spot_min_next_8h, adj_buy_spot_min_next_8h, spot_min_time_next_8h, gapToTrade, willMakeItToNextBuy, willMakeTheNight, itIsBestSellTimeNow, itIsBestBuyTimeNow, soc, ppv, timeToNextPossibleBuy, ehubESOtemp); 
     } else {
         ChargeOrDischarge = 0.0;  // No trade
-        messageToUser = current_hour +":"+ current_minute + "\nM2 Decision: Super low spot, but high SOC " + String(soc) + ". Adjusted buy: " + adjBuyPriceNow;         
+        messageToUser = time + "\nM2 Decision: Super low spot, but high SOC " + String(soc) + ". Adjusted buy: " + adjBuyPriceNow;         
     }    
   
     //Sell:    Sell pricy (but not more than make it to morning or next buy time or daytime)
@@ -271,26 +282,32 @@ if(adjBuyPriceNow <= fixed_markup_buy + 0.05){
 } else if((willMakeTheNight || willMakeItToNextBuy || (ppv > 2))
         && itIsBestSellTimeNow){
 
-    if(soc > lower_soc_limit){             // SOC is still higher than lower limit
-            ChargeOrDischarge = -1.0;  // Discharge/Ladda ur/Sell
+    if(ehubESOtemp < -5){
+        ChargeOrDischarge = 0.0;  // No trade, empty battery
+        messageToUser = time + "\nM3.1 Sell time but no sell. ESO temp below -5 C " + String(soc) + AddMessage( priceNow, adjBuyPriceNow, adjSellPriceNow, last_buy_price, adjBuyPriceLast, last_buy_time, last_sell_price, adjSellPriceLast,last_sell_time, spot_max_next_8h, adj_sell_spot_max_next_8h, spot_max_time_next_8h, spot_min_next_8h, adj_buy_spot_min_next_8h, spot_min_time_next_8h, gapToTrade, willMakeItToNextBuy, willMakeTheNight, itIsBestSellTimeNow, itIsBestBuyTimeNow, soc, ppv, timeToNextPossibleBuy, ehubESOtemp);
+
+    } else if(soc > lower_soc_limit){             // SOC is still higher than lower limit
+        
+        ChargeOrDischarge = -1.0;  // Discharge/Ladda ur/Sell
             // Save our sell
         let result321 = await BLApp.apiPut("/" + bl_last_sell_time + "/" + current_hour); 
         let result331 = await BLApp.apiPut("/" + bl_last_sell_price + "/" + priceNow); 
         let result332 = await BLApp.apiPut("/" + bl_last_sell_price_adj + "/" + adjSellPriceNow); 
 
-        messageToUser = current_hour +":"+ current_minute + "\nM3 Decision: Sell electricity. " + AddMessage( priceNow, adjBuyPriceNow, adjSellPriceNow, last_buy_price, adjBuyPriceLast, last_buy_time, last_sell_price, adjSellPriceLast,last_sell_time, spot_max_next_8h, adj_sell_spot_max_next_8h, spot_max_time_next_8h, spot_min_next_8h, adj_buy_spot_min_next_8h, spot_min_time_next_8h, gapToTrade, willMakeItToNextBuy, willMakeTheNight, itIsBestSellTimeNow, itIsBestBuyTimeNow, soc, ppv);        
+        messageToUser = time + "\nM3.2 Decision: Sell electricity. " + AddMessage( priceNow, adjBuyPriceNow, adjSellPriceNow, last_buy_price, adjBuyPriceLast, last_buy_time, last_sell_price, adjSellPriceLast,last_sell_time, spot_max_next_8h, adj_sell_spot_max_next_8h, spot_max_time_next_8h, spot_min_next_8h, adj_buy_spot_min_next_8h, spot_min_time_next_8h, gapToTrade, willMakeItToNextBuy, willMakeTheNight, itIsBestSellTimeNow, itIsBestBuyTimeNow, soc, ppv, timeToNextPossibleBuy, ehubESOtemp);        
     } else {
         ChargeOrDischarge = 0.0;  // No trade, empty battery
-        messageToUser = current_hour +":"+ current_minute + "\nM4 Decision: Good sell, but battery empty, SOC " + String(soc) +" Spot: " + priceNow + AddMessage( priceNow, adjBuyPriceNow, adjSellPriceNow, last_buy_price, adjBuyPriceLast, last_buy_time, last_sell_price, adjSellPriceLast,last_sell_time, spot_max_next_8h, adj_sell_spot_max_next_8h, spot_max_time_next_8h, spot_min_next_8h, adj_buy_spot_min_next_8h, spot_min_time_next_8h, gapToTrade, willMakeItToNextBuy, willMakeTheNight, itIsBestSellTimeNow, itIsBestBuyTimeNow, soc, ppv);
+        messageToUser = time + "\nM4 Decision: Sell time but, but SOC too low. " + String(soc) +" Spot: " + priceNow + AddMessage( priceNow, adjBuyPriceNow, adjSellPriceNow, last_buy_price, adjBuyPriceLast, last_buy_time, last_sell_price, adjSellPriceLast,last_sell_time, spot_max_next_8h, adj_sell_spot_max_next_8h, spot_max_time_next_8h, spot_min_next_8h, adj_buy_spot_min_next_8h, spot_min_time_next_8h, gapToTrade, willMakeItToNextBuy, willMakeTheNight, itIsBestSellTimeNow, itIsBestBuyTimeNow, soc, ppv, timeToNextPossibleBuy, ehubESOtemp);
     }
 
     // Price low enough to buy?
     //      if cheapest hour and SOC to low
     //      only buy cheapest hour
-} else if (((bestChargetimeNow == 1) && (soc < 40 || ehub_off_season == 1)) || itIsBestBuyTimeNow) {   // Price low enough to buy/charge 
+} //else if (((bestChargetimeNow == 1) && (soc < 40 || ehub_off_season == 1)) || itIsBestBuyTimeNow) {   // Price low enough to buy/charge 
+else if (((bestChargetimeNow == 1) && (soc < 40)) || itIsBestBuyTimeNow) {   // Price low enough to buy/charge 
     if(ppv > 2.5){                           //If panels produce much, charge from sun even if low prices
         ChargeOrDischarge = 0.0;  // No trade
-        messageToUser = current_hour +":"+ current_minute + "\nM5 Decision: Day time,low prices, panels produce "+ ppv +" Dont buy. " + AddMessage( priceNow, adjBuyPriceNow, adjSellPriceNow, last_buy_price, adjBuyPriceLast, last_buy_time, last_sell_price, adjSellPriceLast,last_sell_time, spot_max_next_8h, adj_sell_spot_max_next_8h, spot_max_time_next_8h, spot_min_next_8h, adj_buy_spot_min_next_8h, spot_min_time_next_8h, gapToTrade, willMakeItToNextBuy, willMakeTheNight, itIsBestSellTimeNow, itIsBestBuyTimeNow, soc, ppv);
+        messageToUser = time + "\nM5 Decision: Buy time but panels produce "+ ppv +" Dont buy. " + AddMessage( priceNow, adjBuyPriceNow, adjSellPriceNow, last_buy_price, adjBuyPriceLast, last_buy_time, last_sell_price, adjSellPriceLast,last_sell_time, spot_max_next_8h, adj_sell_spot_max_next_8h, spot_max_time_next_8h, spot_min_next_8h, adj_buy_spot_min_next_8h, spot_min_time_next_8h, gapToTrade, willMakeItToNextBuy, willMakeTheNight, itIsBestSellTimeNow, itIsBestBuyTimeNow, soc, ppv, timeToNextPossibleBuy, ehubESOtemp);
     } else if(soc < upper_soc_limit){   // SOC is still lower than upper limit
         ChargeOrDischarge = 1.0;  // Charge/Ladda/Buy
         // Save our buy
@@ -298,16 +315,16 @@ if(adjBuyPriceNow <= fixed_markup_buy + 0.05){
         let result46 = await BLApp.apiPut("/" + bl_last_buy_price + "/" + priceNow);
         let result46b = await BLApp.apiPut("/" + bl_last_buy_price_adj + "/" + adjBuyPriceNow);  
 
-        messageToUser = current_hour +":"+ current_minute + "\nM6 Decision: Buy from grid. " + AddMessage( priceNow, adjBuyPriceNow, adjSellPriceNow, last_buy_price, adjBuyPriceLast, last_buy_time, last_sell_price, adjSellPriceLast,last_sell_time, spot_max_next_8h, adj_sell_spot_max_next_8h, spot_max_time_next_8h, spot_min_next_8h, adj_buy_spot_min_next_8h, spot_min_time_next_8h, gapToTrade, willMakeItToNextBuy, willMakeTheNight, itIsBestSellTimeNow, itIsBestBuyTimeNow, soc, ppv);
+        messageToUser = time + "\nM6 Decision: Buy from grid. " + AddMessage( priceNow, adjBuyPriceNow, adjSellPriceNow, last_buy_price, adjBuyPriceLast, last_buy_time, last_sell_price, adjSellPriceLast,last_sell_time, spot_max_next_8h, adj_sell_spot_max_next_8h, spot_max_time_next_8h, spot_min_next_8h, adj_buy_spot_min_next_8h, spot_min_time_next_8h, gapToTrade, willMakeItToNextBuy, willMakeTheNight, itIsBestSellTimeNow, itIsBestBuyTimeNow, soc, ppv, timeToNextPossibleBuy, ehubESOtemp);
     } else {
         ChargeOrDischarge = 0.0;  // No trade
-        messageToUser = current_hour +":"+ current_minute + "\nM7 Decision: Good buy time, but battery full or still much sun, SOC " + AddMessage( priceNow, adjBuyPriceNow, adjSellPriceNow, last_buy_price, adjBuyPriceLast, last_buy_time, last_sell_price, adjSellPriceLast,last_sell_time, spot_max_next_8h, adj_sell_spot_max_next_8h, spot_max_time_next_8h, spot_min_next_8h, adj_buy_spot_min_next_8h, spot_min_time_next_8h, gapToTrade, willMakeItToNextBuy, willMakeTheNight, itIsBestSellTimeNow, itIsBestBuyTimeNow, soc, ppv);
+        messageToUser = time + "\nM7 Decision: Buy time, but high SOC " + AddMessage( priceNow, adjBuyPriceNow, adjSellPriceNow, last_buy_price, adjBuyPriceLast, last_buy_time, last_sell_price, adjSellPriceLast,last_sell_time, spot_max_next_8h, adj_sell_spot_max_next_8h, spot_max_time_next_8h, spot_min_next_8h, adj_buy_spot_min_next_8h, spot_min_time_next_8h, gapToTrade, willMakeItToNextBuy, willMakeTheNight, itIsBestSellTimeNow, itIsBestBuyTimeNow, soc, ppv, timeToNextPossibleBuy, ehubESOtemp);
     }
 
 } else {
         
     ChargeOrDischarge = 0.0;
-    messageToUser = current_hour +":"+ current_minute + "\nM8 Decision: No buy, no sell.. \n SOC " + String(soc) +"\n Hours in battery "+ hours_in_battery +"\n hours til next sunrise "+ String(hours_til_next_sunrise) + AddMessage( priceNow, adjBuyPriceNow, adjSellPriceNow, last_buy_price, adjBuyPriceLast, last_buy_time, last_sell_price, adjSellPriceLast,last_sell_time, spot_max_next_8h, adj_sell_spot_max_next_8h, spot_max_time_next_8h, spot_min_next_8h, adj_buy_spot_min_next_8h, spot_min_time_next_8h, gapToTrade, willMakeItToNextBuy, willMakeTheNight, itIsBestSellTimeNow, itIsBestBuyTimeNow, soc, ppv);
+    messageToUser = time + "\nM8 Decision: No trading time. " + AddMessage( priceNow, adjBuyPriceNow, adjSellPriceNow, last_buy_price, adjBuyPriceLast, last_buy_time, last_sell_price, adjSellPriceLast,last_sell_time, spot_max_next_8h, adj_sell_spot_max_next_8h, spot_max_time_next_8h, spot_min_next_8h, adj_buy_spot_min_next_8h, spot_min_time_next_8h, gapToTrade, willMakeItToNextBuy, willMakeTheNight, itIsBestSellTimeNow, itIsBestBuyTimeNow, soc, ppv, timeToNextPossibleBuy, ehubESOtemp);
 }
 
 //debugMessage = debugMessage + " fixed_markup_buy " + fixed_markup_buy + " variable_markup_buy " + variable_markup_buy;
@@ -365,58 +382,31 @@ function makeItToMorning(in_loc_time_float, in_hours_in_battery, loc_sunset_floa
     }
 }
 
-/*
-function makeItToNextBuyTime(loc_time_float, loc_HoursInBattery, loc_MinTimeIn_8h, loc_AdjBuySpotMinNext_8h, loc_adjSellPriceLast, local_lastSellTime, loc_GapToTrade){
-    
-    let hoursToNextMin = 0;
-    
-    // Is the price in 8h good enough?
-    // using bestBuyNow(     current_hour,     adjBuyPriceNow,           last_sell_time,     adjSellPriceLast,     adj_sell_spot_max_next_8h, gapToTrade))
-    let bestBuySoon = true;
-//    bestBuySoon = bestBuyNow(loc_MinTimeIn_8h, loc_AdjBuySpotMinNext_8h, local_lastSellTime, loc_adjSellPriceLast, 0 , loc_GapToTrade);
-
-    if(bestBuySoon){
-
-        // Will we consume the battery before buy time?
-        if(loc_time_float <= loc_MinTimeIn_8h){
-            hoursToNextMin = loc_MinTimeIn_8h - loc_time_float;
-
-        } else {
-            hoursToNextMin = 24 - loc_time_float + loc_MinTimeIn_8h;
-        }
-
-        if(hoursToNextMin < loc_HoursInBattery){
-            debugMessage = debugMessage + " makeItTo NextBuyTime.. Yes. hoursToNextMin " + hoursToNextMin + " and loc_HoursInBattery " + loc_HoursInBattery;
-            return true;
-        } else {
-            debugMessage = debugMessage + " makeItTo NextBuyTime.. No. hoursToNextMin " + hoursToNextMin + " and loc_HoursInBattery " + loc_HoursInBattery;
-            return false;
-        }
-
-    } else {
-        debugMessage = debugMessage + " makeItTo NextBuyTime.. No. Next best buy is not good enough";
-        return false;
-    }
-}
-*/
 
 function makeItToNextBuyTime2(HoursInBattery_loc, GapToTrade_loc, adjSellPriceNow_loc, adj_buy_spot_1h_loc, adj_buy_spot_2h_loc, adj_buy_spot_3h_loc, adj_buy_spot_4h_loc, adj_buy_spot_5h_loc, adj_buy_spot_6h_loc, adj_buy_spot_7h_loc){
     
-    var timeToNextBuy = 100;
-    if(     adjSellPriceNow_loc - adj_buy_spot_1h_loc >= GapToTrade_loc){  timeToNextBuy = 1; }
-    else if(adjSellPriceNow_loc - adj_buy_spot_2h_loc >= GapToTrade_loc){  timeToNextBuy = 2; }
-    else if(adjSellPriceNow_loc - adj_buy_spot_3h_loc >= GapToTrade_loc){  timeToNextBuy = 3; }
-    else if(adjSellPriceNow_loc - adj_buy_spot_4h_loc >= GapToTrade_loc){  timeToNextBuy = 4; }
-    else if(adjSellPriceNow_loc - adj_buy_spot_5h_loc >= GapToTrade_loc){  timeToNextBuy = 5; }
-    else if(adjSellPriceNow_loc - adj_buy_spot_6h_loc >= GapToTrade_loc){  timeToNextBuy = 6; }
-    else if(adjSellPriceNow_loc - adj_buy_spot_7h_loc >= GapToTrade_loc){  timeToNextBuy = 7; }
-    else {  timeToNextBuy = 100; }
+    //var timeToNextBuy = 100;
+    if(     adjSellPriceNow_loc - adj_buy_spot_1h_loc >= GapToTrade_loc){  timeToNextPossibleBuy = 1; }
+    else if(adjSellPriceNow_loc - adj_buy_spot_2h_loc >= GapToTrade_loc){  timeToNextPossibleBuy = 2; }
+    else if(adjSellPriceNow_loc - adj_buy_spot_3h_loc >= GapToTrade_loc){  timeToNextPossibleBuy = 3; }
+    else if(adjSellPriceNow_loc - adj_buy_spot_4h_loc >= GapToTrade_loc){  timeToNextPossibleBuy = 4; }
+    else if(adjSellPriceNow_loc - adj_buy_spot_5h_loc >= GapToTrade_loc){  timeToNextPossibleBuy = 5; }
+    else if(adjSellPriceNow_loc - adj_buy_spot_6h_loc >= GapToTrade_loc){  timeToNextPossibleBuy = 6; }
+    else if(adjSellPriceNow_loc - adj_buy_spot_7h_loc >= GapToTrade_loc){  timeToNextPossibleBuy = 7; }
+    else {  timeToNextPossibleBuy = 100; }
     
-    debugMessage = debugMessage + "\n timeToNextBuy: " + timeToNextBuy
+    debugMessage = debugMessage + "\n timeToNextPossibleBuy: " + timeToNextPossibleBuy
     + "\nadjSellPriceNow_loc: " + adjSellPriceNow_loc
-    + "\nadj_buy_spot_1h_loc:"+ adj_buy_spot_1h_loc;
+    + "\nGapToTrade_loc: "      + GapToTrade_loc
+    + "\nadj_buy_spot_1h_loc: " + adj_buy_spot_1h_loc
+    + "\nadj_buy_spot_2h_loc: " + adj_buy_spot_2h_loc
+    + "\nadj_buy_spot_3h_loc: " + adj_buy_spot_3h_loc
+    + "\nadj_buy_spot_4h_loc: " + adj_buy_spot_4h_loc
+    + "\nadj_buy_spot_5h_loc: " + adj_buy_spot_5h_loc
+    + "\nadj_buy_spot_6h_loc: " + adj_buy_spot_6h_loc
+    + "\nadj_buy_spot_7h_loc: " + adj_buy_spot_7h_loc;
 
-    if (timeToNextBuy <= HoursInBattery_loc) { return true; } 
+    if (timeToNextPossibleBuy <= (HoursInBattery_loc + 1)) { return true; } 
     else { return false; }
 }
     
@@ -427,13 +417,13 @@ function makeItToNextBuyTime2(HoursInBattery_loc, GapToTrade_loc, adjSellPriceNo
 }
 */
 
-function bestBuyNow(hour_now_loc, price_now_loc, last_sell_time_loc, last_sell_price_loc, spot_max_next_8h_loc, gapToTrade_loc, adj_buy_spot_1h_loc, adj_buy_spot_2h_loc, adj_buy_spot_3h_loc, adj_buy_spot_4h_loc, adj_buy_spot_5h_loc, adj_buy_spot_6h_loc){
+function bestBuyNow(hour_now_loc, adj_buy_price_now_loc, last_sell_time_loc, last_sell_price_loc, spot_max_next_8h_loc, gapToTrade_loc, adj_buy_spot_1h_loc, adj_buy_spot_2h_loc, adj_buy_spot_3h_loc, adj_buy_spot_4h_loc, adj_buy_spot_5h_loc, adj_buy_spot_6h_loc){
     
-    if(price_now_loc < 0){ price_now_loc = 0; }
+    if(adj_buy_price_now_loc < 0){ adj_buy_price_now_loc = 0; }
 
     let time_since_last_sell = 0;
-    const forward_price_gap = spot_max_next_8h_loc - price_now_loc;
-    const backward_price_gap = last_sell_price_loc - price_now_loc;
+    const forward_price_gap = spot_max_next_8h_loc - adj_buy_price_now_loc;
+    const backward_price_gap = last_sell_price_loc - adj_buy_price_now_loc;
     if(last_sell_time_loc >= 40){
         time_since_last_sell = 40;
     } else if(hour_now_loc > last_sell_time_loc){
@@ -443,8 +433,8 @@ function bestBuyNow(hour_now_loc, price_now_loc, last_sell_time_loc, last_sell_p
     } 
 
     //If falling spot next few hours..
-    if(     price_now_loc > adj_buy_spot_1h_loc
-        &&  price_now_loc > adj_buy_spot_2h_loc ){
+    if(     adj_buy_price_now_loc > adj_buy_spot_1h_loc
+        &&  adj_buy_price_now_loc > adj_buy_spot_2h_loc ){
             
         debugMessage = debugMessage + "\nNo buy. Better buy within hours.."
         + "\n adj_buy_spot_1h_loc: " + adj_buy_spot_1h_loc
@@ -453,14 +443,14 @@ function bestBuyNow(hour_now_loc, price_now_loc, last_sell_time_loc, last_sell_p
         return false;
     }
 
-    //If MUCH lower spot coming 8 hours..
-    var reduced_price = (price_now_loc + 0.01)/2;
+    var reduced_price = (adj_buy_price_now_loc + 0.01)/2;
 
-    if(price_now_loc < 0.15){
+    if(adj_buy_price_now_loc < 0.15){
         debugMessage = debugMessage + " Under 0.15, buy up.. ";
         return true; 
+    
     // Buy if can sell within 8h forward with enough price gap
-    } else if(  reduced_price > adj_buy_spot_1h_loc
+/*    } else if(  reduced_price > adj_buy_spot_1h_loc > gapToTrade_loc
             ||  reduced_price > adj_buy_spot_2h_loc
             ||  reduced_price > adj_buy_spot_3h_loc 
             ||  reduced_price > adj_buy_spot_4h_loc 
@@ -469,7 +459,8 @@ function bestBuyNow(hour_now_loc, price_now_loc, last_sell_time_loc, last_sell_p
     ){    
         debugMessage = debugMessage + "\nNo buy. MUCH lower spot coming 8 hours..";  
         return false;
-    
+*/
+
     } else if(forward_price_gap > 0 && forward_price_gap > gapToTrade_loc){      
         debugMessage = debugMessage + " bestBuy expensive forward ";
         return true;  
@@ -483,10 +474,10 @@ function bestBuyNow(hour_now_loc, price_now_loc, last_sell_time_loc, last_sell_p
     }
 }
 
-function bestSellNow(hour_now_loc, price_now_loc, last_buy_time_loc, last_buy_price_loc, spot_min_next_8h_loc, gapToTrade_loc, adj_sell_spot_1h_loc, adj_sell_spot_2h_loc, adj_sell_spot_3h_loc, loc_ehub_off_season){
+function bestSellNow(hour_now_loc, adj_sell_price_now_loc, last_buy_time_loc, last_buy_price_loc, spot_min_next_8h_loc, gapToTrade_loc, adj_sell_spot_1h_loc, adj_sell_spot_2h_loc, adj_sell_spot_3h_loc, loc_ehub_off_season){
     let time_since_last_buy = 0;
-    const forward_price_gap = price_now_loc - spot_min_next_8h_loc;
-    var backward_price_gap = price_now_loc - last_buy_price_loc;
+    const forward_price_gap = adj_sell_price_now_loc - spot_min_next_8h_loc;
+    var backward_price_gap = adj_sell_price_now_loc - last_buy_price_loc;
     
     if(loc_ehub_off_season == 1){ backward_price_gap = 0;}
 
@@ -499,9 +490,9 @@ function bestSellNow(hour_now_loc, price_now_loc, last_buy_time_loc, last_buy_pr
     } 
 
     //Should wait as there are better prices all hours to come
-    if(     price_now_loc < adj_sell_spot_1h_loc
-        &&  price_now_loc < adj_sell_spot_2h_loc
-        &&  price_now_loc < adj_sell_spot_3h_loc){
+    if(     adj_sell_price_now_loc < adj_sell_spot_1h_loc
+        &&  adj_sell_price_now_loc < adj_sell_spot_2h_loc
+        &&  adj_sell_price_now_loc < adj_sell_spot_3h_loc){
             
         debugMessage = debugMessage + "No sell. Better sell hours to come."
         + "\nadj_sell_spot_1h_loc: " + adj_sell_spot_1h_loc
@@ -511,11 +502,11 @@ function bestSellNow(hour_now_loc, price_now_loc, last_buy_time_loc, last_buy_pr
         return false;
     }
     // Sell if can buy back in 8h.
-    if(forward_price_gap > 0 && forward_price_gap > gapToTrade_loc){ 
+    if(forward_price_gap > 0 && forward_price_gap >= gapToTrade_loc){ 
         debugMessage = debugMessage + "bestSell cheap forward forward_price_gap " + forward_price_gap + " hour_now_loc " + hour_now_loc + " last_buy_time_loc " + last_buy_time_loc + " time_since_last_buy " + time_since_last_buy;
         return true;
     // Sell again if bought cheap within 10 hours before and now can sell more expensive
-    } else if (time_since_last_buy > 0 && time_since_last_buy < 10 && backward_price_gap > gapToTrade_loc){     
+    } else if (time_since_last_buy >= 0 && time_since_last_buy < 10 && backward_price_gap >= gapToTrade_loc){     
         debugMessage = debugMessage + "bestSell (have bought)  ";
         return true;
     } else {
@@ -562,7 +553,7 @@ function AddMessage(addSpot, addAdjBuy, addAdjSell
     , addSpotMaxIn8h, addAdjSellSpotMaxIn8h, addSpotMaxTimeIn8h
     , addSpotMinIn8h, addAdjBuySpotMinIn8h, addSpotMinTimeIn8h
     , addGapToTrade, addwillMakeItToNextBuy, addwillMakeTheNight, additIsBestSellTimeNow, additIsBestBuyTimeNow, 
-    addSOC, addPPV){
+    addSOC, addPPV, addTimeToNextBuy, addEhubEsoTemp){
     var local_string = "";
     var sell_time_text = "";
     var buy_time_text = "";    
@@ -597,14 +588,19 @@ function AddMessage(addSpot, addAdjBuy, addAdjSell
 
     local_string = 
       "\n SOC: " + addSOC
-    + "\n PPV: " + addPPV
+    + "\n Panels: " + addPPV
+    + "\n ESO temp: " + addEhubEsoTemp
     + "\n Spot: " + addSpot
+   
+    + "\n\n BestBuyTimeNow: "        + additIsBestBuyTimeNow
+    + "\n BestSellTimeNow: "         + additIsBestSellTimeNow 
+    + "\n WillMakeItToNextBuy: "  + addwillMakeItToNextBuy
+    + "\n WillMakeTheNight: "     + addwillMakeTheNight
 
-    + "\n\n forw buy: " + forward_buy_price_gap
-    + "\n backw buy: " + backward_buy_price_gap
-    + "\n forw sell: " + forward_sell_price_gap
-    + "\n backw sell: " + backward_sell_price_gap 
-   // + " Last buy: " + addLastBuy
+    + "\n\n hours in battery: " + hours_in_battery
+    + "\n hours to next possible buy: " + addTimeToNextBuy
+    + "\n hours to next sunrise: " + hours_til_next_sunrise
+    // + " Last buy: " + addLastBuy
    // + " Last sell: " + addLastSell
     
     + "\n\n Real buy price: " + addAdjBuy
@@ -614,16 +610,17 @@ function AddMessage(addSpot, addAdjBuy, addAdjSell
     + "\n coming min " + addAdjBuySpotMinIn8h + " kr at " + addSpotMinTimeIn8h
     + "\n last min " + addAdjLastBuy + " kr" + buy_time_text
 
-    + "\n\n WillMakeItToNextBuy: "  + addwillMakeItToNextBuy
-    + "\n WillMakeTheNight: "       + addwillMakeTheNight
-    + "\n BestSellTimeNow: "        + additIsBestSellTimeNow 
-    + "\n BestBuyTimeNow: "         + additIsBestBuyTimeNow
+    + "\n\n forw buy: " + forward_buy_price_gap
+    + "\n backw buy: " + backward_buy_price_gap
+    + "\n forw sell: " + forward_sell_price_gap
+    + "\n backw sell: " + backward_sell_price_gap 
     
     + "\n\n addGapToTrade: " + addGapToTrade;
 
     return local_string; 
 }
 
+/*
 function AddBuyMessage(addSpot, addAdjBuy
     , addAdjLastSell, addLastSellTime
     , addAdjSellSpotMaxIn8h
@@ -647,6 +644,7 @@ function AddBuyMessage(addSpot, addAdjBuy
 
     return local_string; 
 }
+
 
 function AddSellMessage(addSpot, addAdjSell
     , addAdjLastBuy, addLastBuyTime
@@ -688,6 +686,7 @@ function AddSellMessage(addSpot, addAdjSell
 
     return local_string; 
 }
+*/
 
 // ALWAYS DO THIS:
 //      - End active buy/charge if soc above 98%, return automation to EHUB Self Consumption 

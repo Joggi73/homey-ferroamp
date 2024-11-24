@@ -1,3 +1,5 @@
+// ESM is the battery it self - Energy Storage Module 
+
 if (args[0] == undefined) {
 console.log ('Missing argument looser')
 return false;

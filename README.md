@@ -14,8 +14,8 @@ The following flows and javascripts are tools for starting your own automation w
 ### Preparations
 -   Contact Ferroamp Support and ask for access and credentials to connect to the 'Ferroamp External API' on your EnergyHub. They will give you the username and password for the Energy MQTT broker running on your EnergyHub. Data and commands can then be recieved/sent using a MQTT client on Homey Pro connecting to the MQTT broker residing on your local Ferroamp EnergyHub.
 -	Ensure the Homey is on the same network as the EnergyHub and find out the IP’s:
-    -	EnergyHub 	192.168.150.124 (if that is what you find)
-    -	Homey 	192.168.150.125 (if that is what you find)
+    -	EnergyHub 	192.168.xxx.yyy (if that is what you find)
+    -	Homey 	192.168.zzz.vvv (if that is what you find)
 -	Install the ‘MQTT Client’ for Homey. (Make sure to use the latest version to ensure compatibility with Homey Pro 2023 etc.)
 -	MQTT Client Settings
     -   IP Adress (for the EnergyHub): 		192.168.150.124 (if that is what you find)
